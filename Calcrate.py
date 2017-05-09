@@ -986,19 +986,9 @@ class Calcrate:
                                           )
             csv反力list.append(line)
 
+
             
         for k in range(self.要素数):
-
-            line = "{},{},{},{},{},{},{}".format(
-                         k, 
-                         self.FORCE[0 * self.節点数 + i],
-                         self.FORCE[1 * self.節点数 + i],
-                         self.FORCE[2 * self.節点数 + i],
-                         self.FORCE[3 * self.節点数 + i],
-                         self.FORCE[4 * self.節点数 + i],
-                         self.FORCE[5 * self.節点数 + i]
-                                          )
-            csv要素list.append(line)
 
             self.fbuzai(k)
             i = self.要素節点[k][0]
@@ -1023,23 +1013,29 @@ class Calcrate:
                 gforce[M]= S
 
 
-            Range("S6").Offset(k * 2 - 1, 0).Value = i
-            Range("T6").Offset(k * 2 - 1, 0).Value = gforce(1)
-            Range("U6").Offset(k * 2 - 1, 0).Value = gforce(2)
-            Range("V6").Offset(k * 2 - 1, 0).Value = gforce(3)
-            Range("W6").Offset(k * 2 - 1, 0).Value = gforce(4)
-            Range("X6").Offset(k * 2 - 1, 0).Value = gforce(5)
-            Range("Y6").Offset(k * 2 - 1, 0).Value = gforce(6)
+            line = "{},{},{},{},{},{},{},{}".format(
+                         k, 
+                         i, 
+                         gforce[0],
+                         gforce[1],
+                         gforce[2],
+                         gforce[3],
+                         gforce[4],
+                         gforce[5]
+                         )
+            csv要素list.append(line)
 
-            Range("S6").Offset(k * 2, 0).Value = j
-            Range("T6").Offset(k * 2, 0).Value = gforce(7)
-            Range("U6").Offset(k * 2, 0).Value = gforce(8)
-            Range("V6").Offset(k * 2, 0).Value = gforce(9)
-            Range("W6").Offset(k * 2, 0).Value = gforce(10)
-            Range("X6").Offset(k * 2, 0).Value = gforce(11)
-            Range("Y6").Offset(k * 2, 0).Value = gforce(12)
-        Next k
-    End With
+            line = ",{},{},{},{},{},{},{}".format(
+                         j, 
+                         gforce[6],
+                         gforce[7],
+                         gforce[8],
+                         gforce[9],
+                         gforce[10],
+                         gforce[11]
+                         )
+            csv要素list.append(line)
+
 
         # 出力
         writer.writerow(csvlist)
