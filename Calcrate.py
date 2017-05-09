@@ -1,3 +1,4 @@
+import sys
 import csv
 import math
 
@@ -216,7 +217,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - ktr2(j)             ##
+    ##             self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##             jj=4  (0,1,1 - 1,1,1)              ##
     ##             jj=5  (1,0,1 - 1,1,1)              ##
@@ -259,7 +260,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - ktr2(j)             ##
+    ##             self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##             j1=4  (0,1,1 - 0,1,1)              ##
     ##     ３次元  j1=5  (1,0,1 - 1,0,1)              ##
@@ -317,7 +318,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - ktr2(j)             ##
+    ##             self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##             jj=6  (0,0,1 - 1,1,1)              ##
     ##             jj=5  (0,1,0 - 1,1,1)              ##
@@ -398,7 +399,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - ktr2(j)             ##
+    ##             self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##     ３次元  j=4   (0,0,0 - 1,1,1)              ##
     ##             j=10  (1,1,1 - 0,0,0)              ##
@@ -513,7 +514,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - ktr2(j)             ##
+    ##             self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##     ３次元   j=1  (0,0,1 - 0,0,1)              ##
     ##              j=2  (0,1,0 - 0,1,0)              ##
@@ -952,10 +953,6 @@ class Calcrate:
         csvlist = f.readlines() # 1行毎にファイル終端まで全て読む(改行文字も含まれる)
         f.close()
 
-        # ファイルオープン
-        f = open(self.出力シート名+'.csv', 'w')
-        writer = csv.writer(f, lineterminator='\n')
-
         # データをリストに保持
         csv変位list = {}
         csv反力list = {}
@@ -1036,6 +1033,32 @@ class Calcrate:
                          )
             csv要素list.append(line)
 
+        row = max(len(csv変位list), len(csv反力list), len(csv要素list))
+        for r in range(row):
+            line = ""
+
+            if row < len(csv変位list):
+                line += csv変位list[r] + ","
+            else:
+                line += ",,,,,,,"
+
+            if row < len(csv反力list):
+                line += csv反力list[r] + ","
+            else:
+                line += ",,,,,,,"
+
+            if row < len(csv要素list):
+                line += csv要素list[r] 
+            else:
+                line += ",,,,,,,"
+
+
+            csvlist.append(line)
+
+
+        # ファイルオープン
+        f = open(self.出力シート名+'.csv', 'w')
+        writer = csv.writer(f, lineterminator='\n')
 
         # 出力
         writer.writerow(csvlist)
@@ -1043,164 +1066,152 @@ class Calcrate:
         # ファイルクローズ
         f.close()
 
+
     #########################################
     ##     ３次元　skyline  of  matrix     ##
     ##          ** SkYMAT.for **           ##
     #########################################
-    def SkYマトリックス(NEQ):
-
-        Dim NBC As integer
-        Dim LM(12) As integer, ND As integer
-        Dim i As integer, j As integer, jEL As integer
-        Dim LS As Long, ii As integer, MEE As integer, NDi As integer, kS As integer
-        Dim ij As integer, jj As integer, NEC As integer, kSS As integer
+    def SkYマトリックス(self, NEQ):
 
         NBC = 0
-        for i in range(拘束条件数
-            if (1 = nxfx[i]): NBC = NBC + 1
-            if (1 = nyfx[i]): NBC = NBC + 1
-            if (1 = nzfx[i]): NBC = NBC + 1
-            if (1 = mxfx[i]): NBC = NBC + 1
-            if (1 = myfx[i]): NBC = NBC + 1
-            if (1 = mzfx[i]): NBC = NBC + 1
+        for i in range(self.拘束条件数):
+            if 1 == self.nxfx[i]: NBC = NBC + 1
+            if 1 == self.nyfx[i]: NBC = NBC + 1
+            if 1 == self.nzfx[i]: NBC = NBC + 1
+            if 1 == self.mxfx[i]: NBC = NBC + 1
+            if 1 == self.myfx[i]: NBC = NBC + 1
+            if 1 == self.mzfx[i]: NBC = NBC + 1
         
         NEQ = 6 * self.節点数 - NBC
-        for i in range(self.節点数
-            iD(1, i) = 1
-            iD(2, i) = 1
-            iD(3, i) = 1
-            iD(4, i) = 1
-            iD(5, i) = 1
-            iD(6, i) = 1
+
+        for i in range(self.節点数):
+            self.iD[0][i] = 1
+            self.iD[1][i] = 1
+            self.iD[2][i] = 1
+            self.iD[3][i] = 1
+            self.iD[4][i] = 1
+            self.iD[5][i] = 1
         
-        for i in range(拘束条件数
-            j = 拘束条件節点[i]
-            if (1 = nxfx[i]): iD(1, j) = 0
-            if (1 = nyfx[i]): iD(2, j) = 0
-            if (1 = nzfx[i]): iD(3, j) = 0
-            if (1 = mxfx[i]): iD(4, j) = 0
-            if (1 = myfx[i]): iD(5, j) = 0
-            if (1 = mzfx[i]): iD(6, j) = 0
+        for i in range(self.拘束条件数):
+            j = self.拘束条件節点[i]
+            if 1 == self.nxfx[i]: self.iD[0][j] = 0
+            if 1 == self.nyfx[i]: self.iD[1][j] = 0
+            if 1 == self.nzfx[i]: self.iD[2][j] = 0
+            if 1 == self.mxfx[i]: self.iD[3][j] = 0
+            if 1 == self.myfx[i]: self.iD[4][j] = 0
+            if 1 == self.mzfx[i]: self.iD[5][j] = 0
         
         j = 0
-        for i in range(self.節点数
-            if (iD(1, i) = 1):
+        for i in range(self.節点数):
+            if self.iD[0][i] == 1:
                 j = j + 1
-                iD(1, i) = j
-            End if
-            if (iD(2, i) = 1):
+                self.iD[0][i] = j
+            
+            if self.iD[1][i] == 1:
                 j = j + 1
-                iD(2, i) = j
-            End if
-            if (iD(3, i) = 1):
+                self.iD[1][i] = j
+            
+            if self.iD[2][i] == 1:
                 j = j + 1
-                iD(3, i) = j
-            End if
-            if (iD(4, i) = 1):
+                self.iD[2][i] = j
+            
+            if self.iD[3][i] == 1:
                 j = j + 1
-                iD(4, i) = j
-            End if
-            if (iD(5, i) = 1):
+                self.iD[3][i] = j
+            
+            if self.iD[4][i] == 1:
                 j = j + 1
-                iD(5, i) = j
-            End if
-            if (iD(6, i) = 1):
+                self.iD[4][i] = j
+            
+            if self.iD[5][i] == 1:
                 j = j + 1
-                iD(6, i) = j
-            End if
-        
+                self.iD[5][i] = j
+
 
         ND = 12
-        for i in range(NEQ
-            MHT[i] = 0
-        
-        for jEL = 1 To 要素数
-            for i in range(ND
+        for i in range(NEQ):
+            self.MHT[i] = 0
+
+        LM = [0] * 12
+        for jEL in range( self.要素数):
+            for i in range(ND):
                 LM[i] = 0
             
-            j = 要素節点(jEL, 1)
-            LM(1) = iD(1, j)
-            LM(2) = iD(2, j)
-            LM(3) = iD(3, j)
-            LM(4) = iD(4, j)
-            LM(5) = iD(5, j)
-            LM(6) = iD(6, j)
-            j = 要素節点(jEL, 2)
-            LM(7) = iD(1, j)
-            LM(8) = iD(2, j)
-            LM(9) = iD(3, j)
-            LM(10) = iD(4, j)
-            LM(11) = iD(5, j)
-            LM(12) = iD(6, j)
+            j = self.要素節点[jEL][0]
+            LM[0]  = self.iD[0][j]
+            LM[1]  = self.iD[1][j]
+            LM[2]  = self.iD[2][j]
+            LM[3]  = self.iD[3][j]
+            LM[4]  = self.iD[4][j]
+            LM[5]  = self.iD[5][j]
+            j = self.要素節点[jEL][1]
+            LM[6]  = self.iD[0][j]
+            LM[7]  = self.iD[1][j]
+            LM[8]  = self.iD[2][j]
+            LM[9]  = self.iD[3][j]
+            LM[10] = self.iD[4][j]
+            LM[11] = self.iD[5][j]
+
             LS = 10000000
-            for i in range(ND
-                if (LM[i] != 0 and (LM[i] < LS)):
+            for i in range(ND):
+                if LM[i] != 0 and LM[i] < LS:
                     LS = LM[i]
-                End if
-            
-            for i in range(ND
+                          
+            for i in range(ND):
                 ii = LM[i]
-                if (ii != 0):
+                if ii != 0:
                     MEE = ii - LS
-                    if (MEE > MHT(ii)): MHT(ii) = MEE
-                End if
-            
-        Next jEL
+                    if MEE > self.MHT[ii]: self.MHT[ii] = MEE
 
-        for i in range(NEQ + 1
-            MAXA[i] = 0
-        
-        MAXA(1) = 1
-        MAXA(2) = 2
-        for i = 2 To NEQ
-            MAXA(i + 1) = MAXA[i] + MHT[i] + 1
-        
-        if (MAXA(NEQ + 1) - MAXA(1) > 配列上限):
-            MsgBox "メモリオーバーしました", vbCritical + vbOkOnly
-            End
-        End if
 
-        for jEL = 1 To 要素数
-            Call 小剛性マトリックス作成(jEL)
-            for i in range(ND
+        for i in range(NEQ + 1):
+            self.MAXA[i] = 0
+        
+        self.MAXA[0] = 1
+        self.MAXA[1] = 2
+
+        for i in range(1, NEQ):
+            self.MAXA[i + 1] = self.MAXA[i] + self.MHT[i] + 1
+        
+        if self.MAXA[NEQ + 1] - self.MAXA[0] > self.配列上限:
+            print( "メモリオーバーしました")
+
+        for jEL in range(self.要素数):
+            self.小剛性マトリックス作成(jEL)
+            for i in range(ND):
                 LM[i] = 0
             
-            j = 要素節点(jEL, 1)
-            LM(1) = iD(1, j)
-            LM(2) = iD(2, j)
-            LM(3) = iD(3, j)
-            LM(4) = iD(4, j)
-            LM(5) = iD(5, j)
-            LM(6) = iD(6, j)
-            j = 要素節点(jEL, 2)
-            LM(7) = iD(1, j)
-            LM(8) = iD(2, j)
-            LM(9) = iD(3, j)
-            LM(10) = iD(4, j)
-            LM(11) = iD(5, j)
-            LM(12) = iD(6, j)
+            j = self.要素節点[jEL][0]
+            LM[0]  = self.iD[0][j]
+            LM[1]  = self.iD[1][j]
+            LM[2]  = self.iD[2][j]
+            LM[3]  = self.iD[3][j]
+            LM[4]  = self.iD[4][j]
+            LM[5]  = self.iD[5][j]
+            j = self.要素節点[jEL][1]
+            LM[6]  = self.iD[0][j]
+            LM[7]  = self.iD[1][j]
+            LM[8]  = self.iD[2][j]
+            LM[9]  = self.iD[3][j]
+            LM[10] = self.iD[4][j]
+            LM[11] = self.iD[5][j]
+
             NDi = 0
-            for i in range(ND
+            for i in range(ND):
                 ii = LM[i]
-                if (ii > 0):
+                if ii > 0:
                     kS = i
-                    for j = 1 To ND
-                        jj = LM(j)
-                        if (jj > 0):
+                    for j in range(ND):
+                        jj = LM[j]
+                        if jj > 0:
                             ij = ii - jj
-                            if (ij >= 0):
-                                NEC = MAXA(ii) + ij
+                            if ij >= 0:
+                                NEC = self.MAXA[ii] + ij
                                 kSS = kS
-                                if (j >= i): kSS = j + NDi
-                                AjCB(NEC) = AjCB(NEC) + SE(kSS)
-                            End if
-                        End if
+                                if j >= i: kSS = j + NDi
+                                self.AjCB[NEC] = self.AjCB[NEC] + self.SE[kSS]
                         kS = kS + ND - j
-                    Next j
-                End if
                 NDi = NDi + ND - i
-            
-        Next jEL
 
 
 
@@ -1209,187 +1220,173 @@ class Calcrate:
     ##        selm(12,12)---> se(78)          ##
     ##            ** STiMAS.for **            ##
     ############################################
-    def 小剛性マトリックス作成(jEL):
+    def 小剛性マトリックス作成(self, jEL):
 
-        Dim ts(3, 3), tf(3, 3), te(3, 3), t(12, 12), ek2(12, 12)
-        Dim i As integer, j As integer, k As integer, M As integer
-        Dim FAii As Double, DX As Double, DY As Double, DZ As Double, EL As Double
-        Dim xl As Double, XM As Double, XN As Double, xlm As Double, S As Double
-        Dim G As Double, YYi As Double, ZZi As Double
-        Dim EE As Double, EL2 As Double, EL3 As Double, GkL As Double
-        Dim Y2 As Double, Y4 As Double, Y6 As Double, Y12 As Double
-        Dim Z2 As Double, Z4 As Double, Z6 As Double, Z12 As Double
+        ts  = [ [0.0] * 3 ] * 3
+        tf  = [ [0.0] * 3 ] * 3
+        te  = [ [0.0] * 3 ] * 3
+        t   = [ [0.0] * 3 ] * 3
+        ek2 = [ [0.0] * 3 ] * 3
 
-        M = 要素材料(jEL)
-        FAii = fai(jEL)
-        DX = 節点X(要素節点(jEL, 2)) - 節点X(要素節点(jEL, 1))
-        DY = 節点Y(要素節点(jEL, 2)) - 節点Y(要素節点(jEL, 1))
-        DZ = 節点Z(要素節点(jEL, 2)) - 節点Z(要素節点(jEL, 1))
-        EL = math.sqrt(DX * DX + DY * DY + DZ * DZ)
+        M    = self.要素材料[jEL]
+        FAii = self.fai[jEL]
+        DX   = self.節点X[self.要素節点[jEL][1]] - self.節点X[self.要素節点[jEL][0]]
+        DY   = self.節点Y[self.要素節点[jEL][1]] - self.節点Y[self.要素節点[jEL][0]]
+        DZ   = self.節点Z[self.要素節点[jEL][1]] - self.節点Z[self.要素節点[jEL][0]]
+        EL   = math.sqrt(DX * DX + DY * DY + DZ * DZ)
 
-        if (DX = 0 and DY = 0):
-            te(1, 1) = 0#
-            te(1, 2) = 0#
-            te(1, 3) = 1#
-            te(2, 1) = math.cos(FAii)
-            te(2, 2) = math.sin(FAii)
-            te(2, 3) = 0#
-            te(3, 1) = -math.sin(FAii)
-            te(3, 2) = math.cos(FAii)
-            te(3, 3) = 0#
-        Else
+        if DX == 0 and DY == 0:
+            te[0][0] = 0
+            te[0][1] = 0
+            te[0][2] = 1
+            te[1][0] = math.cos(FAii)
+            te[1][1] = math.sin(FAii)
+            te[1][2] = 0
+            te[2][0] = -math.sin(FAii)
+            te[2][1] = math.cos(FAii)
+            te[2][2] = 0
+        else:
             xl = DX / EL
             XM = DY / EL
             XN = DZ / EL
             xlm = math.sqrt(xl * xl + XM * XM)
-            ts(1, 1) = xl
-            ts(1, 2) = XM
-            ts(1, 3) = XN
-            ts(2, 1) = -XM / xlm
-            ts(2, 2) = xl / xlm
-            ts(2, 3) = 0#
-            ts(3, 1) = -XN * xl / xlm
-            ts(3, 2) = -XM * XN / xlm
-            ts(3, 3) = xlm
-            tf(1, 1) = 1#
-            tf(1, 2) = 0#
-            tf(1, 3) = 0#
-            tf(2, 1) = 0#
-            tf(2, 2) = math.cos(FAii)
-            tf(2, 3) = math.sin(FAii)
-            tf(3, 1) = 0#
-            tf(3, 2) = -math.sin(FAii)
-            tf(3, 3) = math.cos(FAii)
-            for i in range(3
-                for j = 1 To 3
+            ts[0][0] = xl
+            ts[0][1] = XM
+            ts[0][2] = XN
+            ts[1][0] = -XM / xlm
+            ts[1][1] = xl / xlm
+            ts[1][2] = 0
+            ts[2][0] = -XN * xl / xlm
+            ts[2][1] = -XM * XN / xlm
+            ts[2][2] = xlm
+            tf[0][0] = 1
+            tf[0][1] = 0
+            tf[0][2] = 0
+            tf[1][0] = 0
+            tf[1][1] = math.cos(FAii)
+            tf[1][2] = math.sin(FAii)
+            tf[2][0] = 0
+            tf[2][1] = -math.sin(FAii)
+            tf[2][2] = math.cos(FAii)
+
+            for i in range(3):
+                for j in range(3):
                     S = 0
-                    for k = 1 To 3
-                        S = S + tf(i, k) * ts(k, j)
-                    Next k
-                    te(i, j) = S
-                Next j
-            
-        End if
+                    for k in range(3):
+                        S = S + tf[i][k] * ts[k][j]
+                    te[i][j] = S
 
-        G = 弾性係数(M) * 断面積(M) / EL
-        YYi = yi(M)
-        ZZi = zi(M)
-        if (kTR1(jEL) = 0 and kTR2(jEL) = 0): YYi = 0#
-        if (kTR1(jEL) = 0 and kTR2(jEL) = 0): ZZi = 0#
+        G = self.弾性係数[M] * self.断面積[M] / EL
+        YYi = self.yi[M]
+        ZZi = self.zi[M]
+        if self.kTR1[jEL] == 0 and self.kTR2[jEL] == 0: YYi = 0
+        if self.kTR1[jEL] == 0 and self.kTR2[jEL] == 0: ZZi = 0
 
-        EE = 弾性係数(M)
+        EE  = self.弾性係数[M]
         EL2 = EL * EL
         EL3 = EL * EL2
-        Z6 = 6# * EE * ZZi / EL2
-        Z12 = 2# * Z6 / EL
-        Y6 = 6# * EE * YYi / EL2
-        Y12 = 2# * Y6 / EL
-        GkL = gk(M) / EL
-        Y2 = 2# * EE * YYi / EL
-        Y4 = 2# * Y2
-        Z2 = 2# * EE * ZZi / EL
-        Z4 = 2# * Z2
-        for i in range(12
-            for j = i To 12
-                Ek(i, j) = 0#
-            Next j
+        Z6  = 6 * EE * ZZi / EL2
+        Z12 = 2 * Z6 / EL
+        Y6  = 6 * EE * YYi / EL2
+        Y12 = 2 * Y6 / EL
+        GkL = self.gk[M] / EL
+        Y2  = 2 * EE * YYi / EL
+        Y4  = 2 * Y2
+        Z2  = 2 * EE * ZZi / EL
+        Z4  = 2 * Z2
+
+        for i in range(12):
+            for j  in range(12):
+                self.Ek[i][j] = 0
         
-        Ek(1, 1) = G
-        Ek(1, 7) = -G
-        Ek(2, 2) = Z12
-        Ek(2, 6) = Z6
-        Ek(2, 8) = -Z12
-        Ek(2, 12) = Z6
-        Ek(3, 3) = Y12
-        Ek(3, 5) = -Y6
-        Ek(3, 9) = -Y12
-        Ek(3, 11) = -Y6
-        Ek(4, 4) = GkL
-        Ek(4, 10) = -GkL
-        Ek(5, 5) = Y4
-        Ek(5, 9) = Y6
-        Ek(5, 11) = Y2
-        Ek(6, 6) = Z4
-        Ek(6, 8) = -Z6
-        Ek(6, 12) = Z2
-        Ek(7, 7) = G
-        Ek(8, 8) = Z12
-        Ek(8, 12) = -Z6
-        Ek(9, 9) = Y12
-        Ek(9, 11) = Y6
-        Ek(10, 10) = GkL
-        Ek(11, 11) = Y4
-        Ek(12, 12) = Z4
-        for i in range(11
-            for j = i + 1 To 12
-                Ek(j, i) = Ek(i, j)
-            Next j
+        self.Ek[0] [0]  =  G
+        self.Ek[0] [6]  = -G
+        self.Ek[1] [1]  =  Z12
+        self.Ek[1] [5]  =  Z6
+        self.Ek[1] [7]  = -Z12
+        self.Ek[1] [11] =  Z6
+        self.Ek[2] [2]  =  Y12
+        self.Ek[2] [4]  = -Y6
+        self.Ek[2] [8]  = -Y12
+        self.Ek[2] [10] = -Y6
+        self.Ek[3] [3]  =  GkL
+        self.Ek[3] [9]  = -GkL
+        self.Ek[4] [4]  =  Y4
+        self.Ek[4] [8]  =  Y6
+        self.Ek[4] [10] =  Y2
+        self.Ek[5] [5]  =  Z4
+        self.Ek[5] [7]  = -Z6
+        self.Ek[5] [11] =  Z2
+        self.Ek[6] [6]  =  G
+        self.Ek[7] [7]  =  Z12
+        self.Ek[7] [11] = -Z6
+        self.Ek[8] [8]  =  Y12
+        self.Ek[8] [10] =  Y6
+        self.Ek[9] [9]  =  GkL
+        self.Ek[10][10] =  Y4
+        self.Ek[11][11] =  Z4
+
+        for i in range(11):
+            for j in range(i + 1, 12):
+                self.Ek[j][i] = self.Ek[i][j]
+        
+        for i in range(12):
+            for j in range(12):
+                t[i][j] = 0
+        
+        for i in range(3):
+            for j in range(3):
+                t[i][j] = te[i][j]
+                t[3 + i][3 + j] = te[i][j]
+                t[6 + i][6 + j] = te[i][j]
+                t[9 + i][9 + j] = te[i][j]
         
 
-        for i in range(12
-            for j = 1 To 12
-                t(i, j) = 0#
-            Next j
-        
-        for i in range(3
-            for j = 1 To 3
-                t(i, j) = te(i, j)
-                t(3 + i, 3 + j) = te(i, j)
-                t(6 + i, 6 + j) = te(i, j)
-                t(9 + i, 9 + j) = te(i, j)
-            Next j
-        
-
-        for i in range(12
-            for j = 1 To 12
+        for i in range(12):
+            for j in range(12):
                 S = 0
-                for k = 1 To 12
-                    S = t(k, i) * Ek(k, j) + S
-                Next k
-                ek2(i, j) = S
-            Next j
+                for k in range(12):
+                    S = t[k][i] * self.Ek[k][j] + S
+                ek2[i][ j] = S
         
-        for i in range(12
-            for j = 1 To 12
-                S = 0#
-                for k = 1 To 12
-                    S = ek2(i, k) * t(k, j) + S
-                Next k
-                Ek(i, j) = S
-            Next j
+        for i in range(12):
+            for j in range(12):
+                S = 0
+                for k in range(12):
+                    S = ek2[i][k] * t[k][j] + S
+                self.Ek[i][j] = S
         
 
-        if (kTR1(jEL) = 5 and kTR2(jEL) = 7): Call elka1(4)
-        if (kTR1(jEL) = 6 and kTR2(jEL) = 7): Call elka1(5)
-        if (kTR1(jEL) = 4 and kTR2(jEL) = 7): Call elka1(6)
-        if (kTR1(jEL) = 7 and kTR2(jEL) = 5): Call elka1(10)
-        if (kTR1(jEL) = 7 and kTR2(jEL) = 6): Call elka1(11)
-        if (kTR1(jEL) = 7 and kTR2(jEL) = 4): Call elka1(12)
+        if self.kTR1[jEL] == 5 and self.kTR2[jEL] == 7: self.elka1(3)
+        if self.kTR1[jEL] == 6 and self.kTR2[jEL] == 7: self.elka1(4)
+        if self.kTR1[jEL] == 4 and self.kTR2[jEL] == 7: self.elka1(5)
+        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 5: self.elka1(9)
+        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 6: self.elka1(10)
+        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 4: self.elka1(11)
 
-        if (kTR1(jEL) = 5 and kTR2(jEL) = 5): Call elka2(4)
-        if (kTR1(jEL) = 6 and kTR2(jEL) = 6): Call elka2(5)
-        if (kTR1(jEL) = 4 and kTR2(jEL) = 4): Call elka2(6)
+        if self.kTR1[jEL] == 5 and self.kTR2[jEL] == 5: self.elka2(3)
+        if self.kTR1[jEL] == 6 and self.kTR2[jEL] == 6: self.elka2(4)
+        if self.kTR1[jEL] == 4 and self.kTR2[jEL] == 4: self.elka2(5)
 
-        if (kTR1(jEL) = 3 and kTR2(jEL) = 7): Call elka3(6)
-        if (kTR1(jEL) = 2 and kTR2(jEL) = 7): Call elka3(5)
-        if (kTR1(jEL) = 1 and kTR2(jEL) = 7): Call elka3(4)
-        if (kTR1(jEL) = 7 and kTR2(jEL) = 3): Call elka3(12)
-        if (kTR1(jEL) = 7 and kTR2(jEL) = 2): Call elka3(11)
-        if (kTR1(jEL) = 7 and kTR2(jEL) = 1): Call elka3(10)
+        if self.kTR1[jEL] == 3 and self.kTR2[jEL] == 7: self.elka3(5)
+        if self.kTR1[jEL] == 2 and self.kTR2[jEL] == 7: self.elka3(4)
+        if self.kTR1[jEL] == 1 and self.kTR2[jEL] == 7: self.elka3(3)
+        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 3: self.elka3(11)
+        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 2: self.elka3(10)
+        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 1: self.elka3(9)
 
-        if (kTR1(jEL) = 0 and kTR2(jEL) = 7): Call elka4(4)
-        if (kTR1(jEL) = 7 and kTR2(jEL) = 0): Call elka4(10)
+        if self.kTR1[jEL] == 0 and self.kTR2[jEL] == 7: self.elka4(3)
+        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 0: self.elka4(9)
 
-        if (kTR1(jEL) = 3 and kTR2(jEL) = 3): Call elka5(1)
-        if (kTR1(jEL) = 2 and kTR2(jEL) = 2): Call elka5(2)
-        if (kTR1(jEL) = 1 and kTR2(jEL) = 1): Call elka5(3)
+        if self.kTR1[jEL] == 3 and self.kTR2[jEL] == 3: self.elka5(0)
+        if self.kTR1[jEL] == 2 and self.kTR2[jEL] == 2: self.elka5(1)
+        if self.kTR1[jEL] == 1 and self.kTR2[jEL] == 1: self.elka5(2)
 
         k = 0
-        for i in range(12
-            for j = i To 12
+        for i in range(12):
+            for j in range(i, 12):
                 k = k + 1
-                SE(k) = Ek(i, j)
-            Next j
+                self.SE[k] = self.Ek[i][j]
         
 
 
@@ -1398,60 +1395,53 @@ class Calcrate:
     ##    ３次元  [A] ----> [L]*[D]*[L]t     ##
     ##           ** SUBDEC.for **            ##
     ###########################################
-    def decomp(NN):
+    def decomp(self, NN):
 
-        Dim N As integer, j As integer, k As integer, L As integer
-        Dim iC As integer, kLT As integer, ki As integer, kk As integer
-        Dim kN As integer, kL As integer, kU As integer, kH As integer
-        Dim ND As integer, B As Double, C As Double
-
-        for N = 1 To NN
-            kN = MAXA(N)
+        for N in range(NN):
+            kN = self.MAXA[N]
             kL = kN + 1
-            kU = MAXA(N + 1) - 1
+            kU = self.MAXA[N + 1] - 1
             kH = kU - kL
-            if (kH > 0):
+            if kH > 0:
                 k = N - kH
                 iC = 0
                 kLT = kU
-                for j = 1 To kH
+                for j in range(kH):
                     iC = iC + 1
                     kLT = kLT - 1
-                    ki = MAXA(k)
-                    ND = MAXA(k + 1) - ki - 1
-                    if (ND > 0):
-                        if (iC < ND):
+                    ki = self.MAXA[k]
+                    ND = self.MAXA[k + 1] - ki - 1
+                    if ND > 0:
+                        if iC < ND:
                             kk = iC
-                        Else
+                        else:
                             kk = ND
-                        End if
                         C = 0
-                        for L = 1 To kk
-                            C = C + AjCB(ki + L) * AjCB(kLT + L)
-                        Next L
-                        AjCB(kLT) = AjCB(kLT) - C
-                    End if
+                        for L  in range(kk):
+                            C = C + self.AjCB[ki + L] * self.AjCB[kLT + L]
+
+                        self.AjCB[kLT] = self.AjCB[kLT] - C
+
                     k = k + 1
-                Next j
-            End if
-            if (kH >= 0):
+
+            if kH >= 0:
                 k = N
-                B = 0#
-                for kk = kL To kU
+                B = 0
+                for kk in range(kL, kU):
                     k = k - 1
-                    ki = MAXA(k)
-                    C = AjCB(kk) / AjCB(ki)
-                    if (Abs(C) >= 10000000#):
-                        MsgBox "計算エラー", vbCritical + vbOkOnly
-                        End
-                    End if
-                    B = B + C * AjCB(kk)
-                    AjCB(kk) = C
-                Next kk
-                AjCB(kN) = AjCB(kN) - B
-            End if
-            if (AjCB(kN) = 0): AjCB(kN) = -1E-16
-        Next N
+                    ki = self.MAXA[k]
+                    C = self.AjCB[kk] / self.AjCB[ki]
+                    if abs(C) >= 10000000:
+                        print("計算エラー")
+                        sys.exit()
+
+                    B = B + C * self.AjCB[kk]
+                    self.AjCB[kk] = C
+
+                self.AjCB[kN] = self.AjCB[kN] - B
+
+            if self.AjCB[kN] == 0: self.AjCB[kN] = -1E-16
+
 
 
 
@@ -1459,42 +1449,39 @@ class Calcrate:
     ##    ３次元　reduce and back-substitute iteration vectors    ##
     ##                    ** SUBRED.for **                        ##
     ################################################################
-    def redbak(NN):
+    def redbak(self, NN):
 
-        Dim N As integer, k As integer, kk As integer, L As integer
-        Dim kL As integer, kU As integer
-        Dim C As Double
-
-        for N = 1 To NN
-            kL = MAXA(N) + 1
-            kU = MAXA(N + 1) - 1
-            if (kU - kL >= 0):
+        for N in range(NN):
+            kL = self.MAXA[N] + 1
+            kU = self.MAXA[N + 1] - 1
+            if kU - kL >= 0:
                 k = N
                 C = 0
-                for kk = kL To kU
+                for kk in range(kL, kU):
                     k = k - 1
-                    C = C + AjCB(kk) * self.FORCE(k)
-                Next kk
-                self.FORCE(N) = self.FORCE(N) - C
-            End if
-        Next N
-        for N = 1 To NN
-            k = MAXA(N)
-            self.FORCE(N) = self.FORCE(N) / AjCB(k)
-        Next N
+                    C = C + self.AjCB[kk] * self.FORCE[k]
+
+                self.FORCE[N] = self.FORCE[N] - C
+
+
+        for N in range(NN):
+            k = self.MAXA[N]
+            self.FORCE[N] = self.FORCE[N] / self.AjCB[k]
+
+
         N = NN
-        for L = 2 To NN
-            kL = MAXA(N) + 1
-            kU = MAXA(N + 1) - 1
-            if (kU - kL >= 0):
+        for L in range(1, NN):
+            kL = self.MAXA[N] + 1
+            kU = self.MAXA[N + 1] - 1
+            if kU - kL >= 0:
                 k = N
-                for kk = kL To kU
+                for kk in range(kL, kU):
                     k = k - 1
-                    self.FORCE(k) = self.FORCE(k) - AjCB(kk) * self.FORCE(N)
-                Next kk
-            End if
+                    self.FORCE[k] = self.FORCE[k] - self.AjCB[kk] * self.FORCE[N]
+
             N = N - 1
-        Next L
+
+
 
 
 
@@ -1502,123 +1489,107 @@ class Calcrate:
     #      ３次元 節点に分布荷重を集中荷重とモーメントに等価する     #
     #                     ** WBUNPU.for **                           #
     ##################################################################
-    def 分布荷重振り分け():
+    def 分布荷重振り分け(self):
 
-        Dim i As integer, j As integer
-        Dim N1 As integer, N2 As integer, M1 As integer, M2 As integer
-        Dim X1 As Double, Y1 As Double, Z1 As Double, DL As Double
-        Dim X2 As Double, Y2 As Double, Z2 As Double
-        Dim XFM1 As Double, YFM1 As Double, YFM2 As Double
-        Dim ZFM2 As Double, XFM3 As Double, ZFM3 As Double
-        Dim XFM As Double, YFM As Double, ZFM As Double
-
-        for i in range(分布荷重数
-            N1 = 分布荷重節点(i, 1)
-            N2 = 分布荷重節点(i, 2)
-            for j = 1 To 要素数
-                M1 = 要素節点(j, 1)
-                M2 = 要素節点(j, 2)
-                if (N1 = M1 and N2 = M2 Or N1 = M2 and N2 = M1):
-                    if (kTR1(j) = 0 and kTR2(j) = 0):
-                        X1 = 節点X(N1)
-                        Y1 = 節点Y(N1)
-                        Z1 = 節点Z(N1)
-                        X2 = 節点X(N2)
-                        Y2 = 節点Y(N2)
-                        Z2 = 節点Z(N2)
-                        DL = math.sqrt((X2 - X1) * (X2 - X1) _
+        for i in range(self.分布荷重数):
+            N1 = self.分布荷重節点[i][0]
+            N2 = self.分布荷重節点[i][1]
+            for j in range(self.要素数):
+                M1 = self.要素節点[j][0]
+                M2 = self.要素節点[j][1]
+                if N1 == M1 and N2 == M2 or N1 == M2 and N2 == M1:
+                    if self.kTR1[j] == 0 and self.kTR2[j] == 0:
+                        X1 = self.節点X[N1]
+                        Y1 = self.節点Y[N1]
+                        Z1 = self.節点Z[N1]
+                        X2 = self.節点X[N2]
+                        Y2 = self.節点Y[N2]
+                        Z2 = self.節点Z[N2]
+                        DL = math.sqrt((X2 - X1) * (X2 - X1) \
                             + (Y2 - Y1) * (Y2 - Y1) + (Z2 - Z1) * (Z2 - Z1))
-                        集中荷重数 = 集中荷重数 + 1
-                        集中荷重節点(集中荷重数) = N1
-                        fx(集中荷重数) = 0.5 * DL * wx[i]
-                        fy(集中荷重数) = 0.5 * DL * wy[i]
-                        fz(集中荷重数) = 0.5 * DL * wz[i]
-                        fmx(集中荷重数) = 0
-                        fmy(集中荷重数) = 0
-                        fmz(集中荷重数) = 0
-                        集中荷重数 = 集中荷重数 + 1
-                        集中荷重節点(集中荷重数) = N2
-                        fx(集中荷重数) = 0.5 * DL * wx[i]
-                        fy(集中荷重数) = 0.5 * DL * wy[i]
-                        fz(集中荷重数) = 0.5 * DL * wz[i]
-                        fmx(集中荷重数) = 0
-                        fmy(集中荷重数) = 0
-                        fmz(集中荷重数) = 0
-                    End if
-                    if (kTR1(j) = 7 and kTR2(j) = 7):
-                        X1 = 節点X(N1)
-                        Y1 = 節点Y(N1)
-                        Z1 = 節点Z(N1)
-                        X2 = 節点X(N2)
-                        Y2 = 節点Y(N2)
-                        Z2 = 節点Z(N2)
-                        DL = math.sqrt((X2 - X1) * (X2 - X1) _
+                        self.集中荷重数 = self.集中荷重数 + 1
+                        self.集中荷重節点[self.集中荷重数] = N1
+                        self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
+                        self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
+                        self.fz [self.集中荷重数] = 0.5 * DL * self.wz[i]
+                        self.fmx[self.集中荷重数] = 0
+                        self.fmy[self.集中荷重数] = 0
+                        self.fmz[self.集中荷重数] = 0
+                        self.集中荷重数 = self.集中荷重数 + 1
+                        self.集中荷重節点[self.集中荷重数] = N2
+                        self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
+                        self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
+                        self.fz [self.集中荷重数] = 0.5 * DL * self.wz[i]
+                        self.fmx[self.集中荷重数] = 0
+                        self.fmy[self.集中荷重数] = 0
+                        self.fmz[self.集中荷重数] = 0
+
+
+                    if self.kTR1[j] == 7 and self.kTR2[j] == 7:
+                        X1 = self.節点X[N1]
+                        Y1 = self.節点Y[N1]
+                        Z1 = self.節点Z[N1]
+                        X2 = self.節点X[N2]
+                        Y2 = self.節点Y[N2]
+                        Z2 = self.節点Z[N2]
+                        DL = math.sqrt((X2 - X1) * (X2 - X1) \
                             + (Y2 - Y1) * (Y2 - Y1) + (Z2 - Z1) * (Z2 - Z1))
 
-                        YFM1 = Abs(wz[i]) * (X2 - X1) * (X2 - X1) / 12
-                        if ((X2 - X1) * wz[i] > 0#):
+                        YFM1 = abs(self.wz[i]) * (X2 - X1) * (X2 - X1) / 12
+                        if (X2 - X1) * self.wz[i] > 0:
                             YFM1 = -YFM1
-                        Else
+                        else:
                             YFM1 = YFM1
-                        End if
 
-                        XFM1 = Abs(wz[i]) * (Y2 - Y1) * (Y2 - Y1) / 12
-                        if ((Y2 - Y1) * wz[i] > 0#):
+                        XFM1 = abs(self.wz[i]) * (Y2 - Y1) * (Y2 - Y1) / 12
+                        if (Y2 - Y1) * self.wz[i] > 0:
                             XFM1 = XFM1
-                        Else
+                        else:
                             XFM1 = -XFM1
-                        End if
 
-                        ZFM2 = Abs(wx[i]) * (Y2 - Y1) * (Y2 - Y1) / 12#
-                        if ((Y2 - Y1) * wx[i] > 0#):
+                        ZFM2 = abs(self.wx[i]) * (Y2 - Y1) * (Y2 - Y1) / 12
+                        if (Y2 - Y1) * self.wx[i] > 0:
                             ZFM2 = -ZFM2
-                        Else
+                        else:
                             ZFM2 = ZFM2
-                        End if
 
-                        YFM2 = Abs(wx[i]) * (Z2 - Z1) * (Z2 - Z1) / 12#
-                        if ((Z2 - Z1) * wx[i] > 0#):
+                        YFM2 = abs(self.wx[i]) * (Z2 - Z1) * (Z2 - Z1) / 12
+                        if (Z2 - Z1) * self.wx[i] > 0:
                             YFM2 = YFM2
-                        Else
+                        else:
                             YFM2 = -YFM2
-                        End if
 
-                        ZFM3 = Abs(wy[i]) * (X2 - X1) * (X2 - X1) / 12#
-                        if ((X2 - X1) * wy[i] > 0#):
+                        ZFM3 = abs(self.wy[i]) * (X2 - X1) * (X2 - X1) / 12
+                        if (X2 - X1) * self.wy[i] > 0:
                             ZFM3 = ZFM3
-                        Else
+                        else:
                             ZFM3 = -ZFM3
-                        End if
 
-                        XFM3 = Abs(wy[i]) * (Z2 - Z1) * (Z2 - Z1) / 12#
-                        if ((Z2 - Z1) * wy[i] > 0#):
+                        XFM3 = abs(self.wy[i]) * (Z2 - Z1) * (Z2 - Z1) / 12
+                        if (Z2 - Z1) * self.wy[i] > 0:
                             XFM3 = -XFM3
-                        Else
+                        else:
                             XFM3 = XFM3
-                        End if
 
                         XFM = XFM1 + XFM3
                         YFM = YFM1 + YFM2
                         ZFM = ZFM2 + ZFM3
-                        集中荷重数 = 集中荷重数 + 1
-                        集中荷重節点(集中荷重数) = N1
-                        fx(集中荷重数) = 0.5 * DL * wx[i]
-                        fy(集中荷重数) = 0.5 * DL * wy[i]
-                        fz(集中荷重数) = 0.5 * DL * wz[i]
-                        fmx(集中荷重数) = XFM
-                        fmy(集中荷重数) = YFM
-                        fmz(集中荷重数) = ZFM
-                        集中荷重数 = 集中荷重数 + 1
-                        集中荷重節点(集中荷重数) = N2
-                        fx(集中荷重数) = 0.5 * DL * wx[i]
-                        fy(集中荷重数) = 0.5 * DL * wy[i]
-                        fz(集中荷重数) = 0.5 * DL * wz[i]
-                        fmx(集中荷重数) = -XFM
-                        fmy(集中荷重数) = -YFM
-                        fmz(集中荷重数) = -ZFM
-                    End if
-                End if
-            Next j
+                        self.集中荷重数 = self.集中荷重数 + 1
+                        self.集中荷重節点[self.集中荷重数] = N1
+                        self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
+                        self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
+                        self.fz [self.集中荷重数] = 0.5 * DL * self.wz[i]
+                        self.fmx[self.集中荷重数] = XFM
+                        self.fmy[self.集中荷重数] = YFM
+                        self.fmz[self.集中荷重数] = ZFM
+                        self.集中荷重数 = self.集中荷重数 + 1
+                        self.集中荷重節点[self.集中荷重数] = N2
+                        self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
+                        self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
+                        self.fz [self.集中荷重数] = 0.5 * DL * self.wz[i]
+                        self.fmx[self.集中荷重数] = -XFM
+                        self.fmy[self.集中荷重数] = -YFM
+                        self.fmz[self.集中荷重数] = -ZFM
         
 
 
