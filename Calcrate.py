@@ -1,6 +1,8 @@
 import sys
-import csv
+import pandas
 import math
+import traceback
+from numpy import *
 
 class Calcrate:
 
@@ -21,56 +23,56 @@ class Calcrate:
         self.MAX拘束条件 = 100
 
         self.節点数       = 0
-        self.節点X        = [0.0] * self.MAX節点
-        self.節点Y        = [0.0] * self.MAX節点
-        self.節点Z        = [0.0] * self.MAX節点
+        self.節点X        = zeros( self.MAX節点,         dtype=float)
+        self.節点Y        = zeros( self.MAX節点,         dtype=float)
+        self.節点Z        = zeros( self.MAX節点,         dtype=float)
 
         self.材料数       = 0
-        self.弾性係数     = [0.0] * self.MAX材料
-        self.gk           = [0.0] * self.MAX材料
-        self.断面積       = [0.0] * self.MAX材料
-        self.yi           = [0.0] * self.MAX材料
-        self.zi           = [0.0] * self.MAX材料
+        self.弾性係数     = zeros( self.MAX材料,         dtype=float)
+        self.gk           = zeros( self.MAX材料,         dtype=float)
+        self.断面積       = zeros( self.MAX材料,         dtype=float)
+        self.yi           = zeros( self.MAX材料,         dtype=float)
+        self.zi           = zeros( self.MAX材料,         dtype=float)
 
         self.要素数       = 0
-        self.要素節点     = [[0]  * self.MAX要素] * 2
-        self.要素材料     = [0]   * self.MAX要素
-        self.fai          = [0.0] * self.MAX要素
+        self.要素節点     = zeros((self.MAX要素, 2),     dtype=int)
+        self.要素材料     = zeros( self.MAX要素,         dtype=int)
+        self.fai          = zeros( self.MAX要素,         dtype=float)
 
         self.集中荷重数   = 0
-        self.集中荷重節点 = [0]   * self.MAX集中荷重
-        self.fx           = [0.0] * self.MAX集中荷重
-        self.fy           = [0.0] * self.MAX集中荷重
-        self.fz           = [0.0] * self.MAX集中荷重
-        self.fmx          = [0.0] * self.MAX集中荷重
-        self.fmy          = [0.0] * self.MAX集中荷重
-        self.fmz          = [0.0] * self.MAX集中荷重
+        self.集中荷重節点 = zeros( self.MAX集中荷重,     dtype=int)
+        self.fx           = zeros( self.MAX集中荷重,     dtype=float)
+        self.fy           = zeros( self.MAX集中荷重,     dtype=float)
+        self.fz           = zeros( self.MAX集中荷重,     dtype=float)
+        self.fmx          = zeros( self.MAX集中荷重,     dtype=float)
+        self.fmy          = zeros( self.MAX集中荷重,     dtype=float)
+        self.fmz          = zeros( self.MAX集中荷重,     dtype=float)
 
         self.拘束条件数   = 0
-        self.拘束条件節点 = [0]   * self.MAX拘束条件
-        self.nxfx         = [0]   * self.MAX拘束条件
-        self.nyfx         = [0]   * self.MAX拘束条件
-        self.nzfx         = [0]   * self.MAX拘束条件
-        self.mxfx         = [0]   * self.MAX拘束条件
-        self.myfx         = [0]   * self.MAX拘束条件
-        self.mzfx         = [0]   * self.MAX拘束条件
+        self.拘束条件節点 = zeros( self.MAX拘束条件,     dtype=int)
+        self.nxfx         = zeros( self.MAX拘束条件,     dtype=int)
+        self.nyfx         = zeros( self.MAX拘束条件,     dtype=int)
+        self.nzfx         = zeros( self.MAX拘束条件,     dtype=int)
+        self.mxfx         = zeros( self.MAX拘束条件,     dtype=int)
+        self.myfx         = zeros( self.MAX拘束条件,     dtype=int)
+        self.mzfx         = zeros( self.MAX拘束条件,     dtype=int)
 
         self.分布荷重数   = 0
-        self.分布荷重節点 = [[0]  * self.MAX分布荷重] * 2
-        self.wx           = [0.0] * self.MAX分布荷重
-        self.wy           = [0.0] * self.MAX分布荷重
-        self.wz           = [0.0] * self.MAX分布荷重
+        self.分布荷重節点 = zeros((self.MAX分布荷重, 2), dtype=int)
+        self.wx           = zeros( self.MAX分布荷重,     dtype=float)
+        self.wy           = zeros( self.MAX分布荷重,     dtype=float)
+        self.wz           = zeros( self.MAX分布荷重,     dtype=float)
 
-        self.iD           = [[0]  * 6] * self.MAX節点
-        self.SE           = [0.0] * 78
-        self.AjCB         = [0.0] * self.配列上限
-        self.変位         = [[0.0]* self.MAX節点] * 6
-        self.FORCE        = [0.0] * ( 6 * self.MAX節点 )
-        self.MHT          = [0]   * ( 6 * self.MAX節点 )
-        self.MAXA         = [0]   * ( 6 * self.MAX節点 + 1 )
-        self.Ek           = [[0.0]* 12] * 12
-        self.kTR1         = [0]   * self.MAX要素
-        self.kTR2         = [0]   * self.MAX要素
+        self.iD           = zeros((6, self.MAX節点),     dtype=int) 
+        self.SE           = zeros( 78,                   dtype=float)
+        self.AjCB         = zeros( self.配列上限,        dtype=float)
+        self.変位         = zeros((self.MAX節点, 6),     dtype=float)
+        self.FORCE        = zeros( 6 * self.MAX節点,     dtype=float)
+        self.MHT          = zeros( 6 * self.MAX節点,     dtype=int)
+        self.MAXA         = zeros( 6 * self.MAX節点 + 1, dtype=int)
+        self.Ek           = zeros((12, 12),              dtype=float) 
+        self.kTR1         = zeros( self.MAX要素,         dtype=str)
+        self.kTR2         = zeros( self.MAX要素,         dtype=str)
 
 
     ############################################################
@@ -79,106 +81,114 @@ class Calcrate:
     ############################################################
     def データ入力(self):
 
-        f = open(self.入力シート名1+'.csv', 'rb')
-        csv_obj = csv.render(f)
-        Range = [ v for v in csv_obj]
-        f.close()
+        try:
+            filename = self.入力シート名1+'.csv'
+            data = pandas.read_csv(filename, header=None, encoding="SHIFT-JIS")
+            Range = data.values
+        except:
+            traceback.print_exc()
+            return self.入力シート名1+".csv の読み込みに失敗しました。"
 
-        self.節点数 = Range[2][1]
-        self.材料数 = Range[2][5]
-        self.要素数 = Range[2][11]
+
+        self.節点数 = int(Range[2][1])
+        self.材料数 = int(Range[2][5])
+        self.要素数 = int(Range[2][11])
 
         for i in range(self.節点数):
-            self.節点X[i]       = Range[6+i][0]
-            self.節点Y[i]       = Range[6+i][1]
-            self.節点Z[i]       = Range[6+i][2]
+            self.節点X[i]       = float(Range[5+i][0])
+            self.節点Y[i]       = float(Range[5+i][1])
+            self.節点Z[i]       = float(Range[5+i][2])
 
         for i in range(self.材料数):
-            self.弾性係数[i]    = Range[6+i][4]
-            self.gk[i]          = Range[6+i][5]
-            self.断面積[i]      = Range[6+i][6]
-            self.yi[i]          = Range[6+i][7]
-            self.zi[i]          = Range[6+i][8]
+            self.弾性係数[i]    = float(Range[5+i][4])
+            self.gk[i]          = float(Range[5+i][5])
+            self.断面積[i]      = float(Range[5+i][6])
+            self.yi[i]          = float(Range[5+i][7])
+            self.zi[i]          = float(Range[5+i][8])
 
         for i in range(self.要素数):
-            self.要素節点[i][0] = Range[6+i][10]
-            self.要素節点[i][1] = Range[6+i][11]
-            self.要素材料[i]    = Range[6+i][12]
-            k1x = Range[6+i][13]
-            k1y = Range[6+i][14]
-            k1z = Range[6+i][15]
-            k2x = Range[6+i][16]
-            k2y = Range[6+i][17]
-            k2z = Range[6+i][18]
-            self.fai[i]         = Range[6+i][19]
+            self.要素節点[i][0] = int(Range[5+i][10])
+            self.要素節点[i][1] = int(Range[5+i][11])
+            self.要素材料[i]    = int(Range[5+i][12])
+            k1x = int(Range[5+i][13])
+            k1y = int(Range[5+i][14])
+            k1z = int(Range[5+i][15])
+            k2x = int(Range[5+i][16])
+            k2y = int(Range[5+i][17])
+            k2z = int(Range[5+i][18])
+            self.fai[i]         = float(Range[5+i][19])
 
             k1 = k1x + k1y + k1z
             k2 = k2x + k2y + k2z
 
             if   k1 == 0:
-                self.kTR1[i] = 0
+                self.kTR1[i] = "0"
             elif k1 == 1:
-                if k1x == 1: self.kTR1[i] = 1 
-                if k1y == 1: self.kTR1[i] = 2
-                if k1z == 1: self.kTR1[i] = 3
+                if k1x == 1: self.kTR1[i] = "1"
+                if k1y == 1: self.kTR1[i] = "2"
+                if k1z == 1: self.kTR1[i] = "3"
             elif k1 == 2:
-                if k1x == 1 and k1y == 1: self.kTR1[i] = 4
-                if k1y == 1 and k1z == 1: self.kTR1[i] = 5
-                if k1z == 1 and k1x == 1: self.kTR1[i] = 6
+                if k1x == 1 and k1y == 1: self.kTR1[i] = "4"
+                if k1y == 1 and k1z == 1: self.kTR1[i] = "5"
+                if k1z == 1 and k1x == 1: self.kTR1[i] = "6"
             elif k1 == 3:
-                self.kTR1[i] = 7
+                self.kTR1[i] = "7"
 
             if   k2 == 0:
-                self.kTR2[i] = 0
+                self.kTR2[i] = "0"
             elif k2 == 1:
-                if k2x == 1: self.kTR2[i] = 1
-                if k2y == 1: self.kTR2[i] = 2
-                if k2z == 1: self.kTR2[i] = 3
+                if k2x == 1: self.kTR2[i] = "1"
+                if k2y == 1: self.kTR2[i] = "2"
+                if k2z == 1: self.kTR2[i] = "3"
             elif k2 == 2:
-                if k2x == 1 and k2y == 1: self.kTR2[i] = 4
-                if k2y == 1 and k2z == 1: self.kTR2[i] = 5
-                if k2z == 1 and k2x == 1: self.kTR2[i] = 6
+                if k2x == 1 and k2y == 1: self.kTR2[i] = "4"
+                if k2y == 1 and k2z == 1: self.kTR2[i] = "5"
+                if k2z == 1 and k2x == 1: self.kTR2[i] = "6"
             elif k2 == 3:
-                self.kTR2[i] = 7
+                self.kTR2[i] = "7"
 
 
+        try:
+            filename = self.入力シート名2+'.csv'
+            data = pandas.read_csv(filename, header=None, encoding="SHIFT-JIS")
+            Range = data.values
+        except:
+            traceback.print_exc()
+            return self.入力シート名2+".csv の読み込みに失敗しました。"
 
-        f = open(self.入力シート名2+'.csv', 'rb')
-        csv_obj = csv.render(f)
-        Range = [ v for v in csv_obj]
-        f.close()
- 
-        self.拘束条件数 = Range[2][1]
-        self.集中荷重数 = Range[2][9]
-        self.分布荷重数 = Range[2][17]
+
+        self.拘束条件数 = int(Range[2][1])
+        self.集中荷重数 = int(Range[2][9])
+        self.分布荷重数 = int(Range[2][17])
 
         for i in range(self.拘束条件数):
-            self.拘束条件節点[i]    = Range[7+i][1]
-            self.nxfx[i]            = Range[7+i][2]
-            self.nyfx[i]            = Range[7+i][3]
-            self.nzfx[i]            = Range[7+i][4]
-            self.mxfx[i]            = Range[7+i][5]
-            self.myfx[i]            = Range[7+i][6]
-            self.mzfx[i]            = Range[7+i][7]
+            self.拘束条件節点[i]    = int(Range[6+i][0])
+            self.nxfx[i]            = int(Range[6+i][1])
+            self.nyfx[i]            = int(Range[6+i][2])
+            self.nzfx[i]            = int(Range[6+i][3])
+            self.mxfx[i]            = int(Range[6+i][4])
+            self.myfx[i]            = int(Range[6+i][5])
+            self.mzfx[i]            = int(Range[6+i][6])
         
 
         for i in range(self.集中荷重数):
-            self.集中荷重節点[i]    = Range[7+i][9]
-            self.fx[i]              = Range[7+i][10]
-            self.fy[i]              = Range[7+i][11]
-            self.fz[i]              = Range[7+i][12]
-            self.fmx[i]             = Range[7+i][13]
-            self.fmy[i]             = Range[7+i][14]
-            self.fmz[i]             = Range[7+i][15]
+            self.集中荷重節点[i]    =   int(Range[6+i][8])
+            self.fx[i]              = float(Range[6+i][9])
+            self.fy[i]              = float(Range[6+i][10])
+            self.fz[i]              = float(Range[6+i][11])
+            self.fmx[i]             = float(Range[6+i][12])
+            self.fmy[i]             = float(Range[6+i][13])
+            self.fmz[i]             = float(Range[6+i][14])
         
 
         for i in range(self.分布荷重数):
-            self.分布荷重節点[i][0] = Range[7+i][17]
-            self.分布荷重節点[i][1] = Range[7+i][18]
-            self.wx[i]              = Range[7+i][19]
-            self.wy[i]              = Range[7+i][20]
-            self.wz[i]              = Range[7+i][21]
+            self.分布荷重節点[i][0] =   int(Range[6+i][16])
+            self.分布荷重節点[i][1] =   int(Range[6+i][17])
+            self.wx[i]              = float(Range[6+i][18])
+            self.wy[i]              = float(Range[6+i][19])
+            self.wz[i]              = float(Range[6+i][20])
         
+        return None
 
 
     ##################################
@@ -217,7 +227,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - self.kTR2[j)             ##
+    ##        self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##             jj=4  (0,1,1 - 1,1,1)              ##
     ##             jj=5  (1,0,1 - 1,1,1)              ##
@@ -260,7 +270,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - self.kTR2[j)             ##
+    ##        self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##             j1=4  (0,1,1 - 0,1,1)              ##
     ##     ３次元  j1=5  (1,0,1 - 1,0,1)              ##
@@ -318,7 +328,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - self.kTR2[j)             ##
+    ##        self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##             jj=6  (0,0,1 - 1,1,1)              ##
     ##             jj=5  (0,1,0 - 1,1,1)              ##
@@ -399,7 +409,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - self.kTR2[j)             ##
+    ##        self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##     ３次元  j=4   (0,0,0 - 1,1,1)              ##
     ##             j=10  (1,1,1 - 0,0,0)              ##
@@ -514,7 +524,7 @@ class Calcrate:
 
     ####################################################
     ##     トラス（０）　ラーメン（１）の結合状態     ##
-    ##             self.kTR1[i] - self.kTR2[j)             ##
+    ##        self.kTR1[i] - self.kTR2[j)             ##
     ##                    x,y,z - x,y,z               ##
     ##     ３次元   j=1  (0,0,1 - 0,0,1)              ##
     ##              j=2  (0,1,0 - 0,1,0)              ##
@@ -723,11 +733,11 @@ class Calcrate:
     ##############################################################
     def fbuzai(self, jEL):
 
-        ts  = [[0.0] * 3] * 3
-        tf  = [[0.0] * 3] * 3
-        te  = [[0.0] * 3] * 3
-        t   = [[0.0] * 12] * 12
-        ek2 = [[0.0] * 12] * 12
+        ts  = zeros(( 3, 3), dtype=float)
+        tf  = zeros(( 3, 3), dtype=float)
+        te  = zeros(( 3, 3), dtype=float)
+        t   = zeros((12,12), dtype=float)
+        ek2 = zeros((12,12), dtype=float)
 
 
         i    = self.要素節点[jEL][0]
@@ -784,7 +794,7 @@ class Calcrate:
         G = self.弾性係数[M] * self.断面積[M] / EL
         YYi = self.yi[M]
         ZZi = self.zi[M]
-        if self.kTR1[jEL] == 0 and self.kTR2[jEL] == 0:
+        if self.kTR1[jEL] == "0" and self.kTR2[jEL] == "0":
             YYi = 0
             ZZi = 0
 
@@ -861,7 +871,7 @@ class Calcrate:
     ####################################
     def 変位計算(self):
 
-        FLOAD = [0.0] * 6
+        FLOAD = zeros(6, dtype=float)
 
         for i in range(self.節点数):
             for j in range(6):
@@ -896,8 +906,8 @@ class Calcrate:
     ####################################################
     def 力とモーメントの計算(self):
     
-        gforce = [0.0] * 12
-        gdisp  = [0.0] * 12
+        gforce = zeros(12, dtype=float)
+        gdisp  = zeros(12, dtype=float)
 
         for i in range(6 * self.節点数):
             self.FORCE[i] = 0
@@ -946,12 +956,19 @@ class Calcrate:
     ##########################################################
     def 結果出力(self):
     
-        gforce = [0.0] * 12
-        gdisp = [0.0] * 12
+        gforce = zeros(12, dtype=float)
+        gdisp  = zeros(12, dtype=float)
 
-        f = open(self.出力シート名+'.csv')
-        csvlist = f.readlines() # 1行毎にファイル終端まで全て読む(改行文字も含まれる)
-        f.close()
+        try:
+            f = open(self.出力シート名+'.csv', 'rb')
+            csvlist = []
+            for i in range(5):  # タイトル部(5行)だけ読み込む
+                str = f.readline()
+                csvlist.append(str)
+        except:
+            traceback.print_exc()
+        finally:
+            f.close()
 
         # データをリストに保持
         csv変位list = {}
@@ -1051,7 +1068,6 @@ class Calcrate:
                 line += csv要素list[r] 
             else:
                 line += ",,,,,,,"
-
 
             csvlist.append(line)
 
@@ -1222,11 +1238,11 @@ class Calcrate:
     ############################################
     def 小剛性マトリックス作成(self, jEL):
 
-        ts  = [ [0.0] * 3 ] * 3
-        tf  = [ [0.0] * 3 ] * 3
-        te  = [ [0.0] * 3 ] * 3
-        t   = [ [0.0] * 3 ] * 3
-        ek2 = [ [0.0] * 3 ] * 3
+        ts  = zeros((3,3),dtype=float)
+        tf  = zeros((3,3),dtype=float)
+        te  = zeros((3,3),dtype=float)
+        t   = zeros((3,3),dtype=float)
+        ek2 = zeros((3,3),dtype=float)
 
         M    = self.要素材料[jEL]
         FAii = self.fai[jEL]
@@ -1279,8 +1295,8 @@ class Calcrate:
         G = self.弾性係数[M] * self.断面積[M] / EL
         YYi = self.yi[M]
         ZZi = self.zi[M]
-        if self.kTR1[jEL] == 0 and self.kTR2[jEL] == 0: YYi = 0
-        if self.kTR1[jEL] == 0 and self.kTR2[jEL] == 0: ZZi = 0
+        if self.kTR1[jEL] == "0" and self.kTR2[jEL] == "0": YYi = 0
+        if self.kTR1[jEL] == "0" and self.kTR2[jEL] == "0": ZZi = 0
 
         EE  = self.弾性係数[M]
         EL2 = EL * EL
@@ -1357,30 +1373,30 @@ class Calcrate:
                 self.Ek[i][j] = S
         
 
-        if self.kTR1[jEL] == 5 and self.kTR2[jEL] == 7: self.elka1(3)
-        if self.kTR1[jEL] == 6 and self.kTR2[jEL] == 7: self.elka1(4)
-        if self.kTR1[jEL] == 4 and self.kTR2[jEL] == 7: self.elka1(5)
-        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 5: self.elka1(9)
-        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 6: self.elka1(10)
-        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 4: self.elka1(11)
+        if self.kTR1[jEL] == "5" and self.kTR2[jEL] == "7": self.elka1(3)
+        if self.kTR1[jEL] == "6" and self.kTR2[jEL] == "7": self.elka1(4)
+        if self.kTR1[jEL] == "4" and self.kTR2[jEL] == "7": self.elka1(5)
+        if self.kTR1[jEL] == "7" and self.kTR2[jEL] == "5": self.elka1(9)
+        if self.kTR1[jEL] == "7" and self.kTR2[jEL] == "6": self.elka1(10)
+        if self.kTR1[jEL] == "7" and self.kTR2[jEL] == "4": self.elka1(11)
 
-        if self.kTR1[jEL] == 5 and self.kTR2[jEL] == 5: self.elka2(3)
-        if self.kTR1[jEL] == 6 and self.kTR2[jEL] == 6: self.elka2(4)
-        if self.kTR1[jEL] == 4 and self.kTR2[jEL] == 4: self.elka2(5)
+        if self.kTR1[jEL] == "5" and self.kTR2[jEL] == "5": self.elka2(3)
+        if self.kTR1[jEL] == "6" and self.kTR2[jEL] == "6": self.elka2(4)
+        if self.kTR1[jEL] == "4" and self.kTR2[jEL] == "4": self.elka2(5)
 
-        if self.kTR1[jEL] == 3 and self.kTR2[jEL] == 7: self.elka3(5)
-        if self.kTR1[jEL] == 2 and self.kTR2[jEL] == 7: self.elka3(4)
-        if self.kTR1[jEL] == 1 and self.kTR2[jEL] == 7: self.elka3(3)
-        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 3: self.elka3(11)
-        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 2: self.elka3(10)
-        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 1: self.elka3(9)
+        if self.kTR1[jEL] == "3" and self.kTR2[jEL] == "7": self.elka3(5)
+        if self.kTR1[jEL] == "2" and self.kTR2[jEL] == "7": self.elka3(4)
+        if self.kTR1[jEL] == "1" and self.kTR2[jEL] == "7": self.elka3(3)
+        if self.kTR1[jEL] == "7" and self.kTR2[jEL] == "3": self.elka3(11)
+        if self.kTR1[jEL] == "7" and self.kTR2[jEL] == "2": self.elka3(10)
+        if self.kTR1[jEL] == "7" and self.kTR2[jEL] == "1": self.elka3(9)
 
-        if self.kTR1[jEL] == 0 and self.kTR2[jEL] == 7: self.elka4(3)
-        if self.kTR1[jEL] == 7 and self.kTR2[jEL] == 0: self.elka4(9)
+        if self.kTR1[jEL] == "0" and self.kTR2[jEL] == "7": self.elka4(3)
+        if self.kTR1[jEL] == "7" and self.kTR2[jEL] == "0": self.elka4(9)
 
-        if self.kTR1[jEL] == 3 and self.kTR2[jEL] == 3: self.elka5(0)
-        if self.kTR1[jEL] == 2 and self.kTR2[jEL] == 2: self.elka5(1)
-        if self.kTR1[jEL] == 1 and self.kTR2[jEL] == 1: self.elka5(2)
+        if self.kTR1[jEL] == "3" and self.kTR2[jEL] == "3": self.elka5(0)
+        if self.kTR1[jEL] == "2" and self.kTR2[jEL] == "2": self.elka5(1)
+        if self.kTR1[jEL] == "1" and self.kTR2[jEL] == "1": self.elka5(2)
 
         k = 0
         for i in range(12):
@@ -1444,7 +1460,6 @@ class Calcrate:
 
 
 
-
     ################################################################
     ##    ３次元　reduce and back-substitute iteration vectors    ##
     ##                    ** SUBRED.for **                        ##
@@ -1498,7 +1513,7 @@ class Calcrate:
                 M1 = self.要素節点[j][0]
                 M2 = self.要素節点[j][1]
                 if N1 == M1 and N2 == M2 or N1 == M2 and N2 == M1:
-                    if self.kTR1[j] == 0 and self.kTR2[j] == 0:
+                    if self.kTR1[j] == "0" and self.kTR2[j] == "0":
                         X1 = self.節点X[N1]
                         Y1 = self.節点Y[N1]
                         Z1 = self.節点Z[N1]
@@ -1525,7 +1540,7 @@ class Calcrate:
                         self.fmz[self.集中荷重数] = 0
 
 
-                    if self.kTR1[j] == 7 and self.kTR2[j] == 7:
+                    if self.kTR1[j] == "7" and self.kTR2[j] == "7":
                         X1 = self.節点X[N1]
                         Y1 = self.節点Y[N1]
                         Z1 = self.節点Z[N1]

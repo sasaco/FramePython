@@ -1,12 +1,17 @@
-﻿from Calcrate import Calcrate
+﻿import sys
+from Calcrate import Calcrate
 
 if __name__ == "__main__":
 
     cal = Calcrate()
     NEQ = 0
 
-    cal.データ入力()
-    cal.SKYマトリックス(NEQ)
+    err = cal.データ入力()
+    if not err is None:
+        print(err)
+        sys.exit()
+
+    cal.SkYマトリックス(NEQ)
     cal.分布荷重振り分け()
     cal.外力add()
     cal.decomp(NEQ)
