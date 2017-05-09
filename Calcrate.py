@@ -81,6 +81,7 @@ class Calcrate:
         f = open(self.入力シート名1+'.csv', 'rb')
         csv_obj = csv.render(f)
         Range = [ v for v in csv_obj]
+        f.close()
 
         self.節点数 = Range[2][1]
         self.材料数 = Range[2][5]
@@ -144,7 +145,7 @@ class Calcrate:
         f = open(self.入力シート名2+'.csv', 'rb')
         csv_obj = csv.render(f)
         Range = [ v for v in csv_obj]
-    
+        f.close()
  
         self.拘束条件数 = Range[2][1]
         self.集中荷重数 = Range[2][9]
@@ -947,69 +948,104 @@ class Calcrate:
         gforce = [0.0] * 12
         gdisp = [0.0] * 12
 
-        With Worksheets(出力シート名)
-            for i in range(self.節点数
-                Range("_変位番号").Offset(i, 0) = i
-                Range("_変位X").Offset(i, 0) = 変位(i, 1)
-                Range("_変位Y").Offset(i, 0) = 変位(i, 2)
-                Range("_変位Z").Offset(i, 0) = 変位(i, 3)
-                Range("F6").Offset(i, 0) = 変位(i, 4)
-                Range("G6").Offset(i, 0) = 変位(i, 5)
-                Range("H6").Offset(i, 0) = 変位(i, 6)
+        f = open(self.出力シート名+'.csv')
+        csvlist = f.readlines() # 1行毎にファイル終端まで全て読む(改行文字も含まれる)
+        f.close()
+
+        # ファイルオープン
+        f = open(self.出力シート名+'.csv', 'w')
+        writer = csv.writer(f, lineterminator='\n')
+
+        # データをリストに保持
+        csv変位list = {}
+        csv反力list = {}
+        csv要素list = {}
+
+        for i in range(self.節点数):
+            line = "{},{},{},{},{},{},{}".format(
+                         i, 
+                         self.変位[i][0],
+                         self.変位[i][1],
+                         self.変位[i][2],
+                         self.変位[i][3],
+                         self.変位[i][4],
+                         self.変位[i][5]
+                                          )
+            csv変位list.append(line)
             
 
-            for i in range(self.節点数
-                Range("j6").Offset(i, 0).Value = i
-                Range("k6").Offset(i, 0).Value = self.FORCE[i]
-                Range("L6").Offset(i, 0).Value = self.FORCE(self.節点数 + i)
-                Range("M6").Offset(i, 0).Value = self.FORCE(2 * self.節点数 + i)
-                Range("N6").Offset(i, 0).Value = self.FORCE(3 * self.節点数 + i)
-                Range("O6").Offset(i, 0).Value = self.FORCE(4 * self.節点数 + i)
-                Range("P6").Offset(i, 0).Value = self.FORCE(5 * self.節点数 + i)
+        for i in range(self.節点数):
+            line = "{},{},{},{},{},{},{}".format(
+                         i, 
+                         self.FORCE[0 * self.節点数 + i],
+                         self.FORCE[1 * self.節点数 + i],
+                         self.FORCE[2 * self.節点数 + i],
+                         self.FORCE[3 * self.節点数 + i],
+                         self.FORCE[4 * self.節点数 + i],
+                         self.FORCE[5 * self.節点数 + i]
+                                          )
+            csv反力list.append(line)
+
             
+        for k in range(self.要素数):
 
-            for k = 1 To 要素数
-                Range("_要素番号").Offset(k * 2 - 1, 0) = k
-                Call fbuzai(k)
-                i = 要素節点(k, 1)
-                j = 要素節点(k, 2)
-                gdisp(1) = 変位(i, 1)
-                gdisp(2) = 変位(i, 2)
-                gdisp(3) = 変位(i, 3)
-                gdisp(4) = 変位(i, 4)
-                gdisp(5) = 変位(i, 5)
-                gdisp(6) = 変位(i, 6)
-                gdisp(7) = 変位(j, 1)
-                gdisp(8) = 変位(j, 2)
-                gdisp(9) = 変位(j, 3)
-                gdisp(10) = 変位(j, 4)
-                gdisp(11) = 変位(j, 5)
-                gdisp(12) = 変位(j, 6)
-                for M = 1 To 12
-                    S = 0
-                    for N = 1 To 12
-                        S = S + Ek(M, N) * gdisp(N)
-                    Next N
-                    gforce(M) = S
-                Next M
-                Range("S6").Offset(k * 2 - 1, 0).Value = i
-                Range("T6").Offset(k * 2 - 1, 0).Value = gforce(1)
-                Range("U6").Offset(k * 2 - 1, 0).Value = gforce(2)
-                Range("V6").Offset(k * 2 - 1, 0).Value = gforce(3)
-                Range("W6").Offset(k * 2 - 1, 0).Value = gforce(4)
-                Range("X6").Offset(k * 2 - 1, 0).Value = gforce(5)
-                Range("Y6").Offset(k * 2 - 1, 0).Value = gforce(6)
-                Range("S6").Offset(k * 2, 0).Value = j
-                Range("T6").Offset(k * 2, 0).Value = gforce(7)
-                Range("U6").Offset(k * 2, 0).Value = gforce(8)
-                Range("V6").Offset(k * 2, 0).Value = gforce(9)
-                Range("W6").Offset(k * 2, 0).Value = gforce(10)
-                Range("X6").Offset(k * 2, 0).Value = gforce(11)
-                Range("Y6").Offset(k * 2, 0).Value = gforce(12)
-            Next k
-        End With
+            line = "{},{},{},{},{},{},{}".format(
+                         k, 
+                         self.FORCE[0 * self.節点数 + i],
+                         self.FORCE[1 * self.節点数 + i],
+                         self.FORCE[2 * self.節点数 + i],
+                         self.FORCE[3 * self.節点数 + i],
+                         self.FORCE[4 * self.節点数 + i],
+                         self.FORCE[5 * self.節点数 + i]
+                                          )
+            csv要素list.append(line)
+
+            self.fbuzai(k)
+            i = self.要素節点[k][0]
+            j = self.要素節点[k][1]
+            gdisp[0]  = self.変位[i][0]
+            gdisp[1]  = self.変位[i][1]
+            gdisp[2]  = self.変位[i][2]
+            gdisp[3]  = self.変位[i][3]
+            gdisp[4]  = self.変位[i][4]
+            gdisp[5]  = self.変位[i][5]
+            gdisp[6]  = self.変位[j][0]
+            gdisp[7]  = self.変位[j][1]
+            gdisp[8]  = self.変位[j][2]
+            gdisp[9]  = self.変位[j][3]
+            gdisp[10] = self.変位[j][4]
+            gdisp[11] = self.変位[j][5]
+
+            for M in range(12):
+                S = 0
+                for N in range(12):
+                    S = S + self.Ek[M][N] * gdisp[N]
+                gforce[M]= S
 
 
+            Range("S6").Offset(k * 2 - 1, 0).Value = i
+            Range("T6").Offset(k * 2 - 1, 0).Value = gforce(1)
+            Range("U6").Offset(k * 2 - 1, 0).Value = gforce(2)
+            Range("V6").Offset(k * 2 - 1, 0).Value = gforce(3)
+            Range("W6").Offset(k * 2 - 1, 0).Value = gforce(4)
+            Range("X6").Offset(k * 2 - 1, 0).Value = gforce(5)
+            Range("Y6").Offset(k * 2 - 1, 0).Value = gforce(6)
+
+            Range("S6").Offset(k * 2, 0).Value = j
+            Range("T6").Offset(k * 2, 0).Value = gforce(7)
+            Range("U6").Offset(k * 2, 0).Value = gforce(8)
+            Range("V6").Offset(k * 2, 0).Value = gforce(9)
+            Range("W6").Offset(k * 2, 0).Value = gforce(10)
+            Range("X6").Offset(k * 2, 0).Value = gforce(11)
+            Range("Y6").Offset(k * 2, 0).Value = gforce(12)
+        Next k
+    End With
+
+        # 出力
+        writer.writerow(csvlist)
+
+        # ファイルクローズ
+        f.close()
 
     #########################################
     ##     ３次元　skyline  of  matrix     ##
