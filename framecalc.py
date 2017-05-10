@@ -11,14 +11,44 @@ if __name__ == "__main__":
         print(err)
         sys.exit()
 
-    cal.SkYマトリックス(NEQ)
-    cal.分布荷重振り分け()
-    cal.外力add()
-    cal.decomp(NEQ)
-    cal.redbak(NEQ)
-    cal.変位計算()
-    cal.力とモーメントの計算()
+    err, NEQ = cal.SkYマトリックス(0)
+    if not err is None:
+        print(err)
+        sys.exit()
 
-    cal.結果出力()
+    err = cal.分布荷重振り分け()
+    if not err is None:
+        print(err)
+        sys.exit()
+
+    err = cal.外力add()
+    if not err is None:
+        print(err)
+        sys.exit()
+
+    err = cal.decomp(NEQ)
+    if not err is None:
+        print(err)
+        sys.exit()
+
+    err = cal.redbak(NEQ)
+    if not err is None:
+        print(err)
+        sys.exit()
+
+    err = cal.変位計算()
+    if not err is None:
+        print(err)
+        sys.exit()
+
+    err = cal.力とモーメントの計算()
+    if not err is None:
+        print(err)
+        sys.exit()
+
+    err = cal.結果出力()
+    if not err is None:
+        print(err)
+        sys.exit()
 
     print("解析が終わりました")
