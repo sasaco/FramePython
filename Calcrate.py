@@ -3,6 +3,7 @@ import pandas
 import math
 import traceback
 from numpy import *
+import codecs
 
 class Calcrate:
 
@@ -207,6 +208,7 @@ class Calcrate:
 
         try:
             for i in range(self.集中荷重数):
+
                 j = self.集中荷重節点[i] - 1
 
                 if self.fx[i] != 0:
@@ -895,7 +897,7 @@ class Calcrate:
                 for j in range(6):
                     k = self.iD[j][i]
                     if k != 0:
-                        FLOAD[j] = self.FORCE[k]
+                        FLOAD[j] = self.FORCE[k-1]
 
                 self.変位[i][0] = FLOAD[0]
                 self.変位[i][1] = FLOAD[1]
@@ -973,6 +975,7 @@ class Calcrate:
                 self.FORCE[4 * self.節点数 + j] = self.FORCE[4 * self.節点数 + j] + gforce[10]
                 self.FORCE[5 * self.節点数 + j] = self.FORCE[5 * self.節点数 + j] + gforce[11]
 
+
         except:
             traceback.print_exc()
             return "エラーが発生しました：力とモーメントの計算(), 1"
@@ -990,9 +993,9 @@ class Calcrate:
         gdisp  = zeros(12, dtype=float)
 
         try:
-            f = open(self.出力シート名+'.csv', 'rb')
+            f = codecs.open(self.出力シート名+'.csv', "r", "shift_jis")
             csvlist = []
-            for i in range(5):  # タイトル部(5行)だけ読み込む
+            for i in range(6):  # タイトル部(5行)だけ読み込む
                 str = f.readline()
                 csvlist.append(str)
         except:
@@ -1002,14 +1005,14 @@ class Calcrate:
             f.close()
 
         # データをリストに保持
-        csv変位list = {}
-        csv反力list = {}
-        csv要素list = {}
+        csv変位list = []
+        csv反力list = []
+        csv要素list = []
 
         try:
             for i in range(self.節点数):
-                line = "{},{},{},{},{},{},{}".format(
-                             i, 
+                line = ",{},{},{},{},{},{},{}".format(
+                             i + 1, 
                              self.変位[i][0],
                              self.変位[i][1],
                              self.変位[i][2],
@@ -1102,17 +1105,17 @@ class Calcrate:
             for r in range(row):
                 line = ""
 
-                if row < len(csv変位list):
-                    line += csv変位list[r] + ","
+                if r < len(csv変位list):
+                    line += csv変位list[r] + ",,"
                 else:
-                    line += ",,,,,,,"
+                    line += ",,,,,,,,,"
 
-                if row < len(csv反力list):
-                    line += csv反力list[r] + ","
+                if r < len(csv反力list):
+                    line += csv反力list[r] + ",,"
                 else:
-                    line += ",,,,,,,"
+                    line += ",,,,,,,,"
 
-                if row < len(csv要素list):
+                if r < len(csv要素list):
                     line += csv要素list[r] 
                 else:
                     line += ",,,,,,,"
@@ -1125,12 +1128,13 @@ class Calcrate:
 
 
         try:
-            # ファイルオープン
-            f = open(self.出力シート名+'.csv', 'w')
-            writer = csv.writer(f, lineterminator='\n')
+            f = codecs.open(self.出力シート名+'.csv', "w", "shift_jis")
 
-            # 出力
-            writer.writerow(csvlist)
+            for i in range(6):  # タイトル部(6行)だけ書き込む
+                f.write(csvlist[i])
+
+            for i in range(6, len(csvlist)):  
+                f.write(csvlist[i] + "\r\n")
 
         except:
             traceback.print_exc()
@@ -1237,7 +1241,7 @@ class Calcrate:
                     ii = LM[i] 
                     if ii != 0:
                         MEE = ii - LS
-                        ii = ii -1
+                        ii = ii - 1
                         if MEE > self.MHT[ii]: self.MHT[ii] = MEE
 
 
@@ -1443,7 +1447,7 @@ class Calcrate:
                     S = 0
                     for k in range(12):
                         S = t[k][i] * self.Ek[k][j] + S
-                    ek2[i][ j] = S
+                    ek2[i][j] = S
         
             for i in range(12):
                 for j in range(12):
@@ -1506,7 +1510,7 @@ class Calcrate:
                 kU = self.MAXA[N + 1] - 1
                 kH = kU - kL
                 if kH > 0:
-                    k = N - kH
+                    k = N - kH 
                     iC = 0
                     kLT = kU
                     for j in range(kH):
@@ -1520,19 +1524,19 @@ class Calcrate:
                             else:
                                 kk = ND
                             C = 0
-                            for L  in range(kk):
+                            for L in range(kk):
                                 C = C + self.AjCB[ki + L] * self.AjCB[kLT + L]
 
-                            self.AjCB[kLT] = self.AjCB[kLT] - C
+                            self.AjCB[kLT - 1] -= C
 
                         k = k + 1
 
                 if kH >= 0:
                     k = N
                     B = 0
-                    for kk in range(kL, kU):
+                    for kk in range(kL-1, kU):
                         k = k - 1
-                        ki = self.MAXA[k]
+                        ki = self.MAXA[k] - 1
                         C = self.AjCB[kk] / self.AjCB[ki]
                         if abs(C) >= 10000000:
                             return "計算エラー：decomp(), 2"
@@ -1540,9 +1544,9 @@ class Calcrate:
                         B = B + C * self.AjCB[kk]
                         self.AjCB[kk] = C
 
-                    self.AjCB[kN] = self.AjCB[kN] - B
+                    self.AjCB[kN - 1] -= B
 
-                if self.AjCB[kN] == 0: self.AjCB[kN] = -1E-16
+                if self.AjCB[kN - 1] == 0: self.AjCB[kN - 1] = -1E-16
         except:
             traceback.print_exc()
             return "エラーが発生しました：decomp(), 1"
@@ -1559,32 +1563,33 @@ class Calcrate:
 
         try:
             for N in range(NN):
+
                 kL = self.MAXA[N] + 1
                 kU = self.MAXA[N + 1] - 1
                 if kU - kL >= 0:
                     k = N
                     C = 0
-                    for kk in range(kL, kU):
+                    for kk in range(kL-1, kU):
                         k = k - 1
                         C = C + self.AjCB[kk] * self.FORCE[k]
 
-                    self.FORCE[N] = self.FORCE[N] - C
+                    self.FORCE[N] -= C
 
 
             for N in range(NN):
-                k = self.MAXA[N]
+                k = self.MAXA[N] - 1
                 self.FORCE[N] = self.FORCE[N] / self.AjCB[k]
 
 
-            N = NN
+            N = NN - 1
             for L in range(1, NN):
                 kL = self.MAXA[N] + 1
                 kU = self.MAXA[N + 1] - 1
                 if kU - kL >= 0:
                     k = N
-                    for kk in range(kL, kU):
+                    for kk in range(kL-1, kU):
                         k = k - 1
-                        self.FORCE[k] = self.FORCE[k] - self.AjCB[kk] * self.FORCE[N]
+                        self.FORCE[k] -= (self.AjCB[kk] * self.FORCE[N])
 
                 N = N - 1
 
@@ -1619,7 +1624,6 @@ class Calcrate:
                             Z2 = self.節点Z[N2-1]
                             DL = math.sqrt((X2 - X1) * (X2 - X1) \
                                 + (Y2 - Y1) * (Y2 - Y1) + (Z2 - Z1) * (Z2 - Z1))
-                            self.集中荷重数 = self.集中荷重数 + 1
                             self.集中荷重節点[self.集中荷重数] = N1
                             self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
                             self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
@@ -1627,7 +1631,7 @@ class Calcrate:
                             self.fmx[self.集中荷重数] = 0
                             self.fmy[self.集中荷重数] = 0
                             self.fmz[self.集中荷重数] = 0
-                            self.集中荷重数 = self.集中荷重数 + 1
+                            self.集中荷重数 += 1
                             self.集中荷重節点[self.集中荷重数] = N2
                             self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
                             self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
@@ -1635,6 +1639,7 @@ class Calcrate:
                             self.fmx[self.集中荷重数] = 0
                             self.fmy[self.集中荷重数] = 0
                             self.fmz[self.集中荷重数] = 0
+                            self.集中荷重数 += 1
 
 
                         if self.kTR1[j] == "7" and self.kTR2[j] == "7":
@@ -1686,7 +1691,6 @@ class Calcrate:
                             XFM = XFM1 + XFM3
                             YFM = YFM1 + YFM2
                             ZFM = ZFM2 + ZFM3
-                            self.集中荷重数 = self.集中荷重数 + 1
                             self.集中荷重節点[self.集中荷重数] = N1
                             self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
                             self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
@@ -1694,7 +1698,7 @@ class Calcrate:
                             self.fmx[self.集中荷重数] = XFM
                             self.fmy[self.集中荷重数] = YFM
                             self.fmz[self.集中荷重数] = ZFM
-                            self.集中荷重数 = self.集中荷重数 + 1
+                            self.集中荷重数 += 1
                             self.集中荷重節点[self.集中荷重数] = N2
                             self.fx [self.集中荷重数] = 0.5 * DL * self.wx[i]
                             self.fy [self.集中荷重数] = 0.5 * DL * self.wy[i]
@@ -1702,6 +1706,7 @@ class Calcrate:
                             self.fmx[self.集中荷重数] = -XFM
                             self.fmy[self.集中荷重数] = -YFM
                             self.fmz[self.集中荷重数] = -ZFM
+                            self.集中荷重数 += 1
         
         except:
             traceback.print_exc()
